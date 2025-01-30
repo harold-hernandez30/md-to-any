@@ -1,4 +1,5 @@
 import os
+from supported_files import SupportedFiles
 
 class File:
     def __init__(self, parent_dir, filename, is_dir):
@@ -13,10 +14,10 @@ class File:
         new_parent_dir = parent_dir + "/" + filename
         files = os.listdir(new_parent_dir)
         for file in files:
-            if os.path.isdir(new_parent_dir + "/" + file) and not file.startswith("."):
+            if os.path.isdir(new_parent_dir + "/" + file) and not SupportedFiles.is_directory_excluded(file):
                 self._files.append(File(new_parent_dir, file, True))
                 print(f"dir: {file}")
-            elif file.endswith('.md'):
+            elif SupportedFiles.is_content_file_supported(file):
                 self._files.append(File(new_parent_dir, file, False))
                 self._populate_content(new_parent_dir + "/" + file)
         self.is_root = False
