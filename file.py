@@ -5,8 +5,10 @@ class File:
         self._filename = filename
         self._is_dir = is_dir
         self._files = []
+        self._content = ""
         if not is_dir:
             return
+        
 
         new_parent_dir = parent_dir + "/" + filename
         files = os.listdir(new_parent_dir)
@@ -16,8 +18,19 @@ class File:
                 print(f"dir: {file}")
             elif file.endswith('.md'):
                 self._files.append(File(new_parent_dir, file, False))
-                print(f"file: {file}")
+                self._populate_content(new_parent_dir + "/" + file)
         self.is_root = False
+
+    def _populate_content(self, file_path):
+
+        with open(file_path, 'r') as file:
+            line = file.readline()
+            
+            while line:
+                self._content += line
+                line = file.readline()
+        
+        print(f"content: {self._content}")
 
     def __repr__(self):
         if self._files:
