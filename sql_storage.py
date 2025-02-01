@@ -24,16 +24,24 @@ class SQLiteStorage(Storage):
 
     def _create_table(self, table_name):
         
-        if self._check_table_exists(SQLiteStorage.TABLE_FILES) is None:
+        if not self._check_table_exists(SQLiteStorage.TABLE_FILES):
             self._cursor.execute(f"Create TABLE {table_name} (hash TEXT, path TEXT, filename TEXT, content TEXT)")
-            if self._check_table_exists(SQLiteStorage.TABLE_FILES) != None:
+            if not self._check_table_exists(SQLiteStorage.TABLE_FILES):
                 print(f"Table '{table_name}' created")
+        else:
+            print(f"table '{table_name}' already exists")
 
         self._connection.commit()
 
     def add(self, table_name, file):
         hash = hashlib.sha256(file.content.encode('utf-8')).hexdigest()
-        self._cursor.execute(f"INSERT INTO {table_name} VALUES (?, ?, ?, ?)", (hash, file.location, file.filename, file.content))
+        # check if file already exists in the table
+        self._cursor.execute(f"SELECT path, filename FROM {table_name} WHERE filename=? AND path=?", (file.filename, file.location))
+        if self._cursor.fetchone() is not None:
+            print(f"{file.location}/{file.filename} already exists")
+        else:
+            self._cursor.execute(f"INSERT INTO {table_name} VALUES (?, ?, ?, ?)", (hash, file.location, file.filename, file.content))
+
         self._connection.commit()
 
 
