@@ -6,32 +6,43 @@ class File:
         self._filename = filename
         self._is_dir = is_dir
         self._files = []
-        self._content = ""
+        full_path = os.path.join(parent_dir, filename)
         if not is_dir:
+            content = self._read_content(parent_dir + "/" + filename)
+            self.persist(content)
             return
         
 
-        new_parent_dir = parent_dir + "/" + filename
-        files = os.listdir(new_parent_dir)
+        
+        files = os.listdir(full_path)
         for file in files:
-            if os.path.isdir(new_parent_dir + "/" + file) and not SupportedFiles.is_directory_excluded(file):
-                self._files.append(File(new_parent_dir, file, True))
+            if os.path.isdir(os.path.join(full_path, file)) and not SupportedFiles.is_directory_excluded(file):
+                self._files.append(File(full_path, file, True))
                 print(f"dir: {file}")
             elif SupportedFiles.is_content_file_supported(file):
-                self._files.append(File(new_parent_dir, file, False))
-                self._populate_content(new_parent_dir + "/" + file)
+                new_file = File(full_path, file, False)
+                self._files.append(new_file)
         self.is_root = False
+        
 
-    def _populate_content(self, file_path):
+    def persist(self, content):
+        print(f"PERSISTING: {content}")
+            
+
+            
+
+    def _read_content(self, file_path):
+
+        content = ""
 
         with open(file_path, 'r') as file:
             line = file.readline()
             
             while line:
-                self._content += line
+                content += line
                 line = file.readline()
         
-        print(f"content: {self._content}")
+        return content
 
     def __repr__(self):
         if self._files:
